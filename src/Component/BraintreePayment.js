@@ -1,85 +1,64 @@
 import React, { useState, useEffect } from 'react';
+import * as dropin from 'braintree-web-drop-in';
 import axios from 'axios';
+import { useAppcontext } from '../Context/Appcontext';
 
-const BraintreePayment = () => {
-    const [clientToken, setClientToken] = useState('');
-    const [nonce, setNonce] = useState(null);
+const BraintreeComponent = () => {
+  const [clientToken, setClientToken] = useState(null);
+  const [isBraintreeReady, setBraintreeReady] = useState(false);
+  const {serverurl,amount}=useAppcontext()
 
-    useEffect(() => {
-        // Fetch client token from your server
-        axios.get('http://localhost:8888/client_token')
-            .then((response) => {
-                setClientToken(response.data);
-            })
-            .catch((e) => console.log('Error fetching client token', e));
-    }, []);
+  useEffect(() => {
+    // Fetch client token from your server
+    axios.get('http://localhost:8888/client_token')
+        .then((response) => {
+            console.log('Erro', response)
+            setClientToken(response.data);
+            setBraintreeReady(true)
+        })
+        .catch((e) => console.log('Error fetching client token', e));
+}, []);
 
-    const handlePayment = async () => {
-        if (!nonce) {
-            console.error('Nonce is missing. Payment cannot be processed.');
-            return;
-        }
 
-        try {
-            const response = await fetch('http://localhost:8888/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ paymentMethodNonce: nonce }),
-            });
+  const initializeBraintree = async () => {
+    try {
+      const instance =await dropin.create({
+        authorization: clientToken,
+        container: '#dropin-container',
+        paypal: {
+          flow: 'vault',
+        },
+      }).catch(e=>console.log('rt',e))
 
-            if (response.ok) {
-                console.log('Payment successful!');
-                // Handle success, e.g., show a success message or redirect
-            } else {
-                console.error('Payment failed', response);
-                // Handle failure, e.g., show an error message
-            }
-        } catch (error) {
-            console.error('Error processing payment', error);
-        }
-    };
+      document.getElementById('submit-button').addEventListener('click', async () => {
+        const { nonce } = await instance.requestPaymentMethod();
+        // Send the payment nonce to your server for further processing
+        axios.post(`${serverurl}/checkout`,{amount:amount,paymentMethodNonce:nonce})
+        .then((response)=>{
+            console.log('uyt',response.data)
+            alert(`${response.data}`)
+        }).catch((e)=>{
+            console.log('oiu',e)
+        })
+        console.log('Payment Nonce:', nonce);
+      });
+    } catch (error) {
+      console.error('Error initializing Drop-in:', error);
+    }
+  };
 
-    useEffect(() => {
-        if (clientToken) {
-            // Initialize the Braintree Drop-in UI
-            const script = document.createElement('script');
-            script.src = 'https://js.braintreegateway.com/web/dropin/1.32.0/js/dropin.min.js';
-            script.async = true;
-            script.onload = () => {
-                // Configure and mount the Drop-in UI
-                window.braintree.dropin.create({
-                    authorization: clientToken,
-                    container: '#dropin-container',
-                    paypal: {
-                        flow: 'vault',
-                    },
-                }, (error, instance) => {
-                    if (error) {
-                        console.error('Error creating Drop-in instance', error);
-                        return;
-                    }
+  useEffect(() => {
+    if (isBraintreeReady) {
+      initializeBraintree();
+    }
+  }, [isBraintreeReady]);
 
-                    // Set up event listeners for nonce generation
-                    instance.on('paymentMethodRequestable', (event) => {
-                        setNonce(event.nonce);
-                    });
-                });
-            };
-            document.body.appendChild(script);
-        }
-    }, [clientToken]);
-
-    return (
-        <div>
-            Payment Section
-            <div id="dropin-container"></div>
-            <button onClick={handlePayment}>
-                Submit
-            </button>
-        </div>
-    );
+  return (
+    <div>
+      <div id="dropin-container"></div>
+      <button id="submit-button">Submit Payment</button>
+    </div>
+  );
 };
 
-export default BraintreePayment;
+export default BraintreeComponent;

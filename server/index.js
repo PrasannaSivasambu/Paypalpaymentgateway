@@ -2,11 +2,29 @@ import express from "express";
 import "dotenv/config";
 import path from "path";
 import * as paypal from "./paypal-api.js";
-import cors from "cors"
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const cors = require('cors');
 import braintree from "braintree";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
   
 
+
+mongoose.connect('mongodb://127.0.0.1:27017/paypalbraintree', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(error => console.error('Error connecting to MongoDB:', error));
+
+const userSchema = new mongoose.Schema({
+  OrderID:String,
+  PaymentInformation:String
+})
+
+
+const Orderdata = mongoose.model('User', userSchema);
 const app = express();
 const {MERCHANT_ID,PUBLIC_KEY,PRIVATE_KEY}=process.env
 const gateway = new braintree.BraintreeGateway({
@@ -16,7 +34,7 @@ const gateway = new braintree.BraintreeGateway({
     privateKey: PRIVATE_KEY,
   });
 const {  PORT = 8888 } = process.env;
- app.use(cors()) 
+ app.use(cors());
 // host static files
 app.use(express.static("client"));
   
@@ -24,6 +42,19 @@ app.use(express.static("client"));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.post('/approvaldataresult',(req,res)=>{
+  const payinfo=req.body.approvaldata==='Not Found' ? 'Invalid Order' : 'Successful Payment'
+  const newuser=new Orderdata({
+    OrderID:req.body.orderdata,
+    PaymentInformation: payinfo
+})
+newuser.save().then(()=>{
+  res.status(200).send('success')
+}).catch((e)=>{
+  console.log('err',e)
+})
+})
 
 app.get('/client_token', async (req, res) => {
   try {
@@ -72,9 +103,11 @@ app.post("/my-server/create-paypal-order", async (req, res) => {
     }
   });
 app.post("/my-server/capture-paypal-order", async (req, res) => {
+  
     try {
-      const { orderID } = req.params;
+      const { orderID } = req.body;
       const { jsonResponse, httpStatusCode } = await paypal.captureOrder(orderID);
+      console.log('gh',jsonResponse, httpStatusCode)
       res.status(httpStatusCode).json(jsonResponse);
     } catch (error) {
       console.error("Failed to create order:", error);

@@ -11,12 +11,13 @@
   justify-content: space-evenly ;
   font-size:5vmin;
   font-Family:'monospace';
+  /* border-right: 0.6vmin solid #000;   */
   /* border:0.5vmin solid #181818; */
   
 }
 .order{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   
   /* background-color: #000; */
   align-items: center;
