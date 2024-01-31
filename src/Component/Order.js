@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import PayPalPayment from './PayPalPayment'
-import { BraintreePayPalButtons } from '@paypal/react-paypal-js'
 import BraintreePayment from './BraintreePayment'
 import { useAppcontext } from '../Context/Appcontext'
-import axios from 'axios'
+import '../App.css'
 
 export default function Order() {
-  const { orderdata, approvaldata, serverurl ,selectedcurrency, setSelectedCurrency} = useAppcontext()
+  const {  selectedcurrency, setSelectedCurrency} = useAppcontext()
   const { amount, setAmount } = useAppcontext()
   const cardtype = ['', 'VISA', 'AMEX', 'MasterCard', 'UnionPay']
   const [typeofCard, setTypeOfCard] = useState(cardtype[0])
@@ -15,18 +14,7 @@ export default function Order() {
   const [fullname,setFullName]=useState('')
   const [submitcheck,setSubmitCheck]=useState(false)
   const [braintreeshow, setBrainTreeShow] = useState(false)
-  useEffect(() => {
-    console.log('ENTER')
-    if (approvaldata) {
-      axios.post(`${serverurl}/approvaldataresult`, { orderdata: orderdata, approvaldata: approvaldata.data })
-        .then((response) => {
-          console.log('respi', response.data)
-        })
-        .catch((error) => {
-          console.log('erri', error)
-        })
-    }
-  }, [approvaldata])
+  
   const exchangeRates = {
     USD: { EUR: 0.85, THB: 31.28, HKD: 7.76, SGD: 1.35, AUD: 1.29 },
     EUR: { USD: 1.18, THB: 36.88, HKD: 9.14, SGD: 1.59, AUD: 1.52 },
@@ -155,18 +143,18 @@ export default function Order() {
   return (
     <div className='order'>
       <div className='order-info'>
-        <div style={{}}>Order Section</div>
-        <div style={{ display: 'flex', }} >
+        <div >Order Section</div>
+        <div className='amount-container'  >
           <label>
-            <span style={{ fontSize: 3 + 'vmin', fontFamily: 'monospace' }}>
+            <span className='amount-word' >
               Amount :
             </span>
-            <span style={{ padding: 2 + 'vmin', fontSize: 3 + 'vmin' }}>
+            <span className='amount-value' >
               {amount}
             </span>
           </label>
           <label>
-          <span style={{ padding:1+'vmin',fontSize: 3 + 'vmin', fontFamily: 'monospace' }}>
+          <span className='currency-word' >
               Currency
             </span>
           <span>
@@ -181,16 +169,16 @@ export default function Order() {
           </label>
         </div>
 
-        <div style={{ fontSize: 3 + 'vmin', fontFamily: 'monospace',display:'flex',flexDirection:'row' }}>
+        <div className='fullname-container'>
           <span>FullName :</span>
-          <span style={{ fontSize:2+'vmin',padding: 0 + 'vmin',display:'flex',flexDirection:'column',alignItems:'center' }}>
-            <input value={fullname} placeholder='john' style={{marginLeft:1+'vmin',border:namecolor?`0.3vmin solid ${namecolor}`:'0.2vmin solid black', width: 30 + 'vmin', height: 4 + 'vmin',borderColor:namecolor }} onChangeCapture={(e)=>onNameEnter(e)} />
-            <div style={{}}> {namecolor?'Type your full name':null}</div>
+          <span className='fullnameinput-inline'>
+            <input className='fullname-input' placeholder='john' style={{marginLeft:1+'vmin',border:namecolor?`0.3vmin solid ${namecolor}`:'0.2vmin solid black', width: 30 + 'vmin', height: 4 + 'vmin',borderColor:namecolor }} onChangeCapture={(e)=>onNameEnter(e)} />
+            <div > {namecolor?'Type your full name':null}</div>
           </span>
         </div>
-        <div style={{ fontSize: 3 + 'vmin', fontFamily: 'monospace' }}>
+        <div className='currencyselection -container' >
           <span>Select Card Type   </span>
-          <select value={typeofCard} onChange={handleCardChange} style={{border:typeofCard==='' && namecolor?`0.3vmin solid ${namecolor}`:'0.1vmin solid black'}}>
+          <select  value={typeofCard} onChange={handleCardChange} style={{border:typeofCard==='' && namecolor?`0.3vmin solid ${namecolor}`:'0.1vmin solid black'}}>
             {cardtype.map((currency) => (
               <option key={currency} value={currency}>
                 {currency}
@@ -198,20 +186,20 @@ export default function Order() {
             ))}
           </select>
         </div>
-        <div style={{fontFamily:'monospace',fontSize:'3vmin',justifyContent:'center',alignItems:'center',borderRadius:'1vmin',border:'3px solid black',display:'flex',width:17+'vmin'}} onClick={()=>onSubmit()}>
+        <div className='submit-button' onClick={()=>onSubmit()}>
           Submit
           </div>      
 
       </div>
       {submitcheck?
       <div className='order-info' style={{height:110+'vmin'}}   >
-        {paypalshow ?
-          <div style={{ padding: 3 + 'vmin', marginLeft: '1vmin' }}>Payment Section</div> : null
+        {paypalshow || braintreeshow ?
+          <div className='payment-header' >Payment Section</div> : null
         }
-        {paypalshow ? <div style={{  marginLeft: '1vmin' }}><PayPalPayment /></div> : null}
-        {(selectedcurrency !== 'USD' && typeofCard === 'AMEX') ? <div style={{ marginLeft: '1vmin',opacity:0.2,fontFamily:'monospace' }}> AMEX is possible to use only for USD</div> : null}
+        {paypalshow ? <div className='paypal' ><PayPalPayment /></div> : null}
+        {(selectedcurrency !== 'USD' && typeofCard === 'AMEX') ? <div className='amex' > AMEX is possible to use only for USD</div> : null}
 
-        {braintreeshow ? <div style={{ marginLeft: '3vmin' }}><BraintreePayment /></div> : null}
+        {braintreeshow ? <div className='braintree' ><BraintreePayment /></div> : null}
       </div>:null}
     </div>
 

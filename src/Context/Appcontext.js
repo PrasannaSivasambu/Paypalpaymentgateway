@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState ,useRef} from 'react'
+import React, { useContext, useState } from 'react'
 
 
 const AppcontextContext = React.createContext()
@@ -12,8 +12,6 @@ export function useAppcontext() {
 export function AppcontextProvider({children }) {   
     let fixedprice=1
     const [amount, setAmount] = useState(fixedprice.toFixed(2));
-    const [orderdata,setOrderData]=useState(null) 
-    const [approvaldata,setApprovalData]=useState(null)
     const [selectedcurrency, setSelectedCurrency] = useState('USD')
     const [selectedproducts,setSelectedProducts]=useState([])
     const serverurl='http://localhost:8888'
@@ -66,7 +64,7 @@ export function AppcontextProvider({children }) {
     ];
     // const value={runAppcontext,frontPageAppcontexts,setFrontPageAppcontexts,BlackRotateInterpolateY,WhiteRotateInterpolateY,Profiletranslateinterpolate,MainViewScaleYInterpolate,MainviewtranslateYInterpolate,MainViewtranslateXInterpolate,MainViewscaleXInterpolate,scalezoomoutInterpolate,scaleplayInterpolate,BlackKnightAnimeInterpolate,WhiteKnightAnimeInterpolate,BlackKnightRotateXInterpolate,WhiteKnightRotateXInterpolate}
   return (
-    <AppcontextContext.Provider value={{products,selectedproducts,setSelectedProducts,selectedcurrency, setSelectedCurrency,serverurl,amount,setAmount,orderdata,setOrderData,approvaldata,setApprovalData}}>
+    <AppcontextContext.Provider onChange={{}} value={{products,selectedproducts,setSelectedProducts,selectedcurrency, setSelectedCurrency,serverurl,amount,setAmount}}>
       {children}
     </AppcontextContext.Provider>
   )

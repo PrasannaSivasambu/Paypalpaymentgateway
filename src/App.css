@@ -1,3 +1,69 @@
+.amount-container{
+  display: flex;
+}
+.amount-word{
+  font-size: 3vmin;
+   font-family: monospace;
+}
+.amount-value{
+  padding: 2vmin;
+   font-size: 3vmin;
+}
+.currency-word{
+  padding:1vmin;
+  font-size: 3vmin;
+  font-family: monospace
+}
+.fullname-container{
+  font-size: 3vmin;
+  font-family: monospace;
+  display:flex;
+  flex-direction:row
+}
+.fullnameinput-inline{
+  font-size:2vmin;
+  display:flex;
+  flex-direction:column;
+  align-items:center
+}
+.currencyselection-container{
+  font-size: 3vmin;
+   font-family: monospace
+}
+.submit-button{
+  font-family:monospace;
+  font-size:3vmin;
+  justify-content:center;
+  align-items:center;
+  border-radius:1vmin;
+  border:3px solid black;
+  display:flex;
+  width:17vmin
+}
+.payment-header{
+  padding: 3vmin;
+   margin-left: 1vmin;
+   position: relative;
+   bottom: 1vmin;
+}
+.paypal{
+  position:relative;
+  bottom:15vmin;
+  margin-left: 1vmin
+}
+.braintree{
+  position:relative;
+  bottom:25vmin;
+  height:20vmin;
+  margin-left: 3vmin
+}
+.amex{
+  margin-left: 1vmin;
+  opacity:0.2;
+  font-family:monospace
+}
+
+
 .Info{
   background-color:#282c34;
   color: aliceblue;
